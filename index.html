@@ -1,41 +1,96 @@
 <html>
     <head>
         <title>Drive the NodeBot!</title>
+
+        <style>
+            #drive-box {
+                background-color: lightblue;
+                width: 400px;
+                height: 400px;
+                position: absolute;
+                z-index: 2;
+            }
+
+            #drive-spot {
+                background-color: darkblue;
+                width: 10px;
+                height: 10px;
+                position: absolute;
+                z-index: 2;
+            }
+        </style>
     </head>
     <body>
         <h1>Drive!</h1>
-        <form action="/drive" method="GET">
-            Left speed:
-            <input type="number" id="left" onblur="update()">
+        <h2>Click, don't drag, how you want the robot to drive.</h2>
 
-            Right speed:
-            <input type="number" id="right" onblur="update()">
-            <br />
-            <textarea id="status"></textarea>
-        </form>
+        <div id="drive-box"></div>
+        <div id="drive-spot"></div>
+        
 
         <script src="https://code.jquery.com/jquery-3.3.1.min.js" integrity="sha256-FgpCb/KJQlLNfOu91ta32o/NMZxltwRo8QtmkMRdAu8=" crossorigin="anonymous"></script>
 
         <script>
-            function update() {
-                var left = $('#left').val();
-                var right = $('#right').val();
+            var offsetX, offsetY;
+            var width, height;
+            var firstClick = true;
 
-                $('#status').val('Sending...');
+            //borrows code from https://stackoverflow.com/questions/25855336/position-of-click-within-div
+            $(document).ready(function() {
+
+                offsetX = $('#drive-box').offset().left;
+                offsetY = $('#drive-box').offset().top;
+                width = $('#drive-box').width();
+                height = $('#drive-box').height();
+
+                spotWidth = $('#drive-spot').width();
+                spotHeight = $('#drive-spot').height();
+                
+                $('#drive-spot').offset( {
+                    left: offsetX + (width - spotWidth) / 2, 
+                    top: offsetY + (height - spotHeight) / 2
+                });
+
+                $('#drive-box').on('click',  function(e) {
+                    var div = document.getElementById('drive-box');
+
+                    var spotX = e.pageX - offsetX;
+                    var spotY = e.pageY - offsetY;
+
+                    var xpct = (spotX / width) * 200 - 100;
+                    var ypct = (spotY / height) * -200 + 100;
+
+                    console.log('Percents: ' + xpct + ',' + ypct);
+
+                    $('#drive-spot').offset( {
+                        left: offsetX + spotX - (spotWidth / 2), 
+                        top: offsetY + spotY - (spotHeight / 2)
+                    });
+
+                    update (xpct, ypct);
+                }); 
+            });
+            
+            function update(x,y) {
+                //calculate left and right side speeds from x,y:
+                var left = y + x;
+                var right = y - x;
+
+                console.log('Sending '+ left + ',' + right + '...');
 
                 $.ajax({
-                    type: 'GET',
-                    url: '/drive?left=' + left + '&right=' + right,
+                     type: 'GET',
+                     url: '/drive?left=' + left + '&right=' + right,
                     
-                    success: function (response) {
-                        $('#status').val(response);
-                        },
-                    failure: function (response) {
-                        alert("Failure" + response.responseText);
-                    },
-                    error: function (response) {
-                        alert("Error" + response.responseText);
-                    }
+                     success: function (response) {
+                         console.log(response);
+                     },
+                     failure: function (response) {
+                         alert("Failure" + response.responseText);
+                     },
+                     error: function (response) {
+                         alert("Error" + response.responseText);
+                     }
                 });
             }
         </script>

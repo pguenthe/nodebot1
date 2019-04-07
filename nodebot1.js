@@ -1,5 +1,6 @@
 var leftMotor, rightMotor;
-var deadzone = 25;
+var maxSpeed = 250;
+var deadzone = maxSpeed * .15;
 
 var five = require("johnny-five"),
   board = new five.Board();
@@ -29,6 +30,9 @@ board.on("ready", function() {
 });
 
 five.drive =  function(left, right){
+  left = left / 100 * maxSpeed;
+  right = right / 100 * maxSpeed;
+
   if (left > deadzone) {
    leftMotor.forward(left);
   } else if (left < -1 * deadzone) {
@@ -68,7 +72,7 @@ function index(res) {
 http.createServer(function (req, res) {
   var path = url.parse(req.url).pathname;
   console.log('Request received on path ' + path);
-  
+
   if (path === '/') {
     index(res);
   }
