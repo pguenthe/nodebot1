@@ -1,0 +1,43 @@
+<html>
+    <head>
+        <title>Drive the NodeBot!</title>
+    </head>
+    <body>
+        <h1>Drive!</h1>
+        <form action="/drive" method="GET">
+            Left speed:
+            <input type="number" id="left" onblur="update()">
+
+            Right speed:
+            <input type="number" id="right" onblur="update()">
+            <br />
+            <textarea id="status"></textarea>
+        </form>
+
+        <script src="https://code.jquery.com/jquery-3.3.1.min.js" integrity="sha256-FgpCb/KJQlLNfOu91ta32o/NMZxltwRo8QtmkMRdAu8=" crossorigin="anonymous"></script>
+
+        <script>
+            function update() {
+                var left = $('#left').val();
+                var right = $('#right').val();
+
+                $('#status').val('Sending...');
+
+                $.ajax({
+                    type: 'GET',
+                    url: '/drive?left=' + left + '&right=' + right,
+                    
+                    success: function (response) {
+                        $('#status').val(response);
+                        },
+                    failure: function (response) {
+                        alert("Failure" + response.responseText);
+                    },
+                    error: function (response) {
+                        alert("Error" + response.responseText);
+                    }
+                });
+            }
+        </script>
+    </body>
+</html>
