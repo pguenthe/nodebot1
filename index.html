@@ -26,34 +26,31 @@
 
         <div id="drive-box"></div>
         <div id="drive-spot"></div>
-        
-
-        <script src="https://code.jquery.com/jquery-3.3.1.min.js" integrity="sha256-FgpCb/KJQlLNfOu91ta32o/NMZxltwRo8QtmkMRdAu8=" crossorigin="anonymous"></script>
 
         <script>
+            var box, spot;
             var offsetX, offsetY;
             var width, height;
             var firstClick = true;
 
-            //borrows code from https://stackoverflow.com/questions/25855336/position-of-click-within-div
-            $(document).ready(function() {
+            document.addEventListener("DOMContentLoaded", function() {
+                console.log('Beginning setup');
 
-                offsetX = $('#drive-box').offset().left;
-                offsetY = $('#drive-box').offset().top;
-                width = $('#drive-box').width();
-                height = $('#drive-box').height();
+                var box = document.getElementById('drive-box');
+                var spot = document.getElementById('drive-spot');
 
-                spotWidth = $('#drive-spot').width();
-                spotHeight = $('#drive-spot').height();
+                offsetX = box.offsetLeft;
+                offsetY = box.offsetTop;
+                width = box.clientWidth;
+                height = box.clientHeight;
                 
-                $('#drive-spot').offset( {
-                    left: offsetX + (width - spotWidth) / 2, 
-                    top: offsetY + (height - spotHeight) / 2
-                });
+                spotWidth = spot.clientWidth;
+                spotHeight = spot.clientHeight;
+                
+                spot.style.left = (offsetX + (width - spotWidth) / 2) + 'px';
+                spot.style.top = (offsetY + (height - spotHeight) / 2) + 'px';
 
-                $('#drive-box').on('click',  function(e) {
-                    var div = document.getElementById('drive-box');
-
+                box.onclick = function(e) {
                     var spotX = e.pageX - offsetX;
                     var spotY = e.pageY - offsetY;
 
@@ -62,15 +59,15 @@
 
                     console.log('Percents: ' + xpct + ',' + ypct);
 
-                    $('#drive-spot').offset( {
-                        left: offsetX + spotX - (spotWidth / 2), 
-                        top: offsetY + spotY - (spotHeight / 2)
-                    });
-
+                    spot.style.left = offsetX + spotX - (spotWidth / 2);
+                    spot.style.top = offsetY + spotY - (spotHeight / 2);
+                    
                     update (xpct, ypct);
-                }); 
+                };
+
+                console.log('Setup complete!');
             });
-            
+                
             function update(x,y) {
                 //calculate left and right side speeds from x,y:
                 var left = y + x;
@@ -78,21 +75,21 @@
 
                 console.log('Sending '+ left + ',' + right + '...');
 
-                $.ajax({
-                     type: 'GET',
-                     url: '/drive?left=' + left + '&right=' + right,
-                    
-                     success: function (response) {
-                         console.log(response);
-                     },
-                     failure: function (response) {
-                         alert("Failure" + response.responseText);
-                     },
-                     error: function (response) {
-                         alert("Error" + response.responseText);
-                     }
-                });
+                var xhr = new XMLHttpRequest();
+                xhr.open('GET', '/drive?left=' + left + '&right=' + right);
+                xhr.send(null);
+
+                xhr.onreadystatechange = function () {
+                    if (xhr.readyState === 4) {
+                        if (xhr.status === 200) {
+                            console.log('Success: ' + xhr.responseText);
+                        } else {
+                            console.log('Error: ' + xhr.status);
+                        }
+                    }
+                };
             }
+
         </script>
     </body>
 </html>
