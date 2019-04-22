@@ -1,0 +1,150 @@
+<html>
+    <head>
+        <title>Drive the NodeBot!</title>
+
+        <style>
+            #dual-controls {
+                top: 200px;
+                display: flex;
+                align-items: center;
+                width: 60%;
+                margin-left: 20%;
+                margin-right: 20%;
+                justify-content: space-evenly
+            }
+
+            #drive-steering {
+                z-index: 0;
+            }
+
+            #drive-throttle {
+                z-index: 0;
+            }
+
+            #throttle-spot {
+                background-color: darkblue;
+                width: 24px;
+                height: 8px;
+                z-index: 2;
+                position: absolute;
+            }
+
+            #steer-spot {
+                background-color: darkblue;
+                width: 8px;
+                height: 24px;
+                z-index: 2;
+                position: absolute;
+            }
+        </style>
+    </head>
+    <body>
+        <h1>Drive!</h1>
+        <a href="single.html">Switch to single stick</a>
+
+        <div id="steer-spot"></div>
+        <div id="throttle-spot"></div>
+
+        <div id="dual-controls">
+
+            <div>
+                <img id="drive-throttle" src="images/control-bar-vert.png"
+                height="298" width="24" />
+            </div>
+
+            <div>
+                <img id="drive-steering" src="images/control-bar-horiz.png"
+                width="298" height="24" />
+            </div>
+
+        </div>
+
+        <script>
+            var throttle, steering, throttleSpot, steerSpot;
+            var xpct = 0;
+            var ypct = 0;
+
+            document.addEventListener("DOMContentLoaded", setup);
+            
+            function setup() {
+
+                throttle = document.getElementById('drive-throttle');
+                throttleSpot = document.getElementById('throttle-spot');
+                setupSpot(throttle, throttleSpot);
+
+                steering = document.getElementById('drive-steering');
+                steerSpot = document.getElementById('steer-spot');
+                setupSpot(steering, steerSpot);
+
+                throttle.onclick = function(e) {
+                    var spotY = e.pageY - throttle.offsetTop;
+                    ypct = -200 * (spotY / throttle.height) + 100;
+
+                    console.log('Throttle percent: ' + ypct);
+
+                    throttleSpot.style.top = (throttle.offsetTop 
+                        + spotY - 4) + 'px';//4 = half of spot height
+                        
+                    update (xpct, ypct);
+                };
+
+                steering.onclick = function(e) {
+                    var spotX = e.pageX - steering.offsetLeft;
+                    xpct = 200 * (spotX / steering.width) - 100;
+
+                    steerSpot.style.left = (steering.offsetLeft 
+                        + spotX - 4) + 'px';//4 = half of spot width
+                        
+                    update (xpct, ypct);
+                };
+
+                console.log('Setup complete!');
+            }
+
+            function setupSpot(box, spot) {
+                offsetX = box.offsetLeft;
+                offsetY = box.offsetTop;
+                width = box.clientWidth;
+                height = box.clientHeight;
+                
+                spotWidth = spot.clientWidth;
+                spotHeight = spot.clientHeight;
+                
+                spot.style.left = (offsetX + (width - spotWidth) / 2) + 'px';
+                spot.style.top = (offsetY + (height - spotHeight) / 2) + 'px';
+            
+                //console.log (box.id + ": " + spot.style.left + "," + spot.style.top);
+            }
+                
+            function update(x,y) {
+                //calculate left and right side speeds from x,y:
+                var right, left;
+
+                if (y > 0) {
+                    left = y + x;
+                    right = y - x;
+                } else {
+                    left = y - x;
+                    right = y + x;
+                }
+
+                console.log('Sending '+ left + ',' + right + '...');
+
+                var xhr = new XMLHttpRequest();
+                xhr.open('GET', '/drive?left=' + left + '&right=' + right);
+                xhr.send(null);
+
+                xhr.onreadystatechange = function () {
+                    if (xhr.readyState === 4) {
+                        if (xhr.status === 200) {
+                            console.log('Success: ' + xhr.responseText);
+                        } else {
+                            console.log('Error: ' + xhr.status);
+                        }
+                    }
+                };
+            }
+
+        </script>
+    </body>
+</html>

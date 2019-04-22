@@ -56,13 +56,26 @@ var http = require('http');
 var url = require('url');
 var fs =  require('fs');
 
-function index(res) {
-  fs.readFile('index.html', function(err, data){
+function serveFile(path, res) {
+  if (path === '/') {
+    path = 'index.html';
+  } else {
+    path = path.substring(1); //drop the initial /
+  }
+
+  var contentType = '';
+  if (path.endsWith('.html')) {
+    contentType = 'text/html';
+  } else if (path.endsWith('.png')) {
+    contentType = 'image/png';
+  }
+
+  fs.readFile(path, function(err, data){
     if(err){
       res.statusCode = 500;
       res.end(`Error getting the file: ${err}.`);
     } else {
-      res.setHeader('Content-type', 'text/html' );
+      res.setHeader('Content-type', contentType);
       res.end(data);
     }
   });
@@ -73,9 +86,6 @@ http.createServer(function (req, res) {
   var path = url.parse(req.url).pathname;
   console.log('Request received on path ' + path);
 
-  if (path === '/') {
-    index(res);
-  }
   if (path === '/drive') {
     var params = url.parse(req.url, true).query;
     var left =  params.left ? params.left : 0;
@@ -86,5 +96,7 @@ http.createServer(function (req, res) {
     res.setHeader('Content-type', 'text/plain' );
     res.write('Set speed to ' + left + ',' + right);
     res.end();
+  } else {
+    serveFile(path, res);
   }
 }).listen(8080); 

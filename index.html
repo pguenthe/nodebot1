@@ -1,95 +1,12 @@
 <html>
     <head>
         <title>Drive the NodeBot!</title>
-
-        <style>
-            #drive-box {
-                background-color: lightblue;
-                width: 400px;
-                height: 400px;
-                position: absolute;
-                z-index: 2;
-            }
-
-            #drive-spot {
-                background-color: darkblue;
-                width: 10px;
-                height: 10px;
-                position: absolute;
-                z-index: 2;
-            }
-        </style>
     </head>
     <body>
-        <h1>Drive!</h1>
-        <h2>Click, don't drag, how you want the robot to drive.</h2>
-
-        <div id="drive-box"></div>
-        <div id="drive-spot"></div>
-
-        <script>
-            var box, spot;
-            var offsetX, offsetY;
-            var width, height;
-            var firstClick = true;
-
-            document.addEventListener("DOMContentLoaded", function() {
-                console.log('Beginning setup');
-
-                var box = document.getElementById('drive-box');
-                var spot = document.getElementById('drive-spot');
-
-                offsetX = box.offsetLeft;
-                offsetY = box.offsetTop;
-                width = box.clientWidth;
-                height = box.clientHeight;
-                
-                spotWidth = spot.clientWidth;
-                spotHeight = spot.clientHeight;
-                
-                spot.style.left = (offsetX + (width - spotWidth) / 2) + 'px';
-                spot.style.top = (offsetY + (height - spotHeight) / 2) + 'px';
-
-                box.onclick = function(e) {
-                    var spotX = e.pageX - offsetX;
-                    var spotY = e.pageY - offsetY;
-
-                    var xpct = (spotX / width) * 200 - 100;
-                    var ypct = (spotY / height) * -200 + 100;
-
-                    console.log('Percents: ' + xpct + ',' + ypct);
-
-                    spot.style.left = offsetX + spotX - (spotWidth / 2);
-                    spot.style.top = offsetY + spotY - (spotHeight / 2);
-                    
-                    update (xpct, ypct);
-                };
-
-                console.log('Setup complete!');
-            });
-                
-            function update(x,y) {
-                //calculate left and right side speeds from x,y:
-                var left = y + x;
-                var right = y - x;
-
-                console.log('Sending '+ left + ',' + right + '...');
-
-                var xhr = new XMLHttpRequest();
-                xhr.open('GET', '/drive?left=' + left + '&right=' + right);
-                xhr.send(null);
-
-                xhr.onreadystatechange = function () {
-                    if (xhr.readyState === 4) {
-                        if (xhr.status === 200) {
-                            console.log('Success: ' + xhr.responseText);
-                        } else {
-                            console.log('Error: ' + xhr.status);
-                        }
-                    }
-                };
-            }
-
-        </script>
+        <h1>Choose your controls:</h1>
+        <h2>
+            <a href="single.html">Single Stick (Arcade)</a>
+            <a href="dual.html">Dual Stick (Speed and Steering)</a>
+        </h2>
     </body>
 </html>
