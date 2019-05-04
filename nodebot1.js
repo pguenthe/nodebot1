@@ -1,4 +1,7 @@
 var leftMotor, rightMotor;
+var leftSensor, middleSensor, rightSensor;
+var proximitySensor;
+
 var maxSpeed = 250;
 var deadzone = maxSpeed * .15;
 var name = '';
@@ -25,6 +28,30 @@ board.on("ready", function() {
   });
 
   var motors = new five.Motors([leftMotor, rightMotor]);
+
+  leftSensor = new five.Sensor.Digital(2);
+  leftSensor.on("change", function() {
+    console.log('Left: ' + this.value);
+  });
+
+  middleSensor = new five.Sensor.Digital(4);
+  middleSensor.on("change", function() {
+    console.log('Middle: ' + this.value);
+  });
+
+  rightSensor = new five.Sensor.Digital(10);
+  rightSensor.on("change", function() {
+    console.log('Right: ' + this.value);
+  });
+
+  proximitySensor = new five.Proximity({
+    controller: "HCSR04",
+    pin: 7
+  });
+  proximitySensor.on("change", function() {
+    console.log("inches: ", this.inches);
+    console.log("cm: ", this.cm);
+  });
 
   board.repl.inject({
     motors: motors
