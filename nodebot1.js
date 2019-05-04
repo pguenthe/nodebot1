@@ -46,7 +46,7 @@ board.on("ready", function() {
 
   proximitySensor = new five.Proximity({
     controller: "HCSR04",
-    pin: 7
+    pin: "A4"
   });
   proximitySensor.on("change", function() {
     console.log("inches: ", this.inches);
