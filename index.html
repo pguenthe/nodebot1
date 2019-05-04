@@ -3,10 +3,16 @@
         <title>Drive the NodeBot!</title>
     </head>
     <body>
-        <h1>Choose your controls:</h1>
-        <h2>
-            <a href="single.html">Single Stick (Arcade)</a>
-            <a href="dual.html">Dual Stick (Speed and Steering)</a>
-        </h2>
+        <h1>Drive the NodeBot!</h1>
+        <h2>Log in:</h2>
+            <form action="authenticate.html" method="get">
+                <label for="mbox">Email Address:</label>
+                <input type="email" id="mbox" name="mbox" /><br />
+
+                <label for="name">Name:</label>
+                <input type="text" id="name" name="name" /><br />
+
+                <input type="submit" value="Begin!" />
+            </form>
     </body>
 </html>

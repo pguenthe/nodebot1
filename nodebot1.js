@@ -1,6 +1,8 @@
 var leftMotor, rightMotor;
 var maxSpeed = 250;
 var deadzone = maxSpeed * .15;
+var name = '';
+var mbox = '';
 
 var five = require("johnny-five"),
   board = new five.Board();
@@ -57,8 +59,13 @@ var url = require('url');
 var fs =  require('fs');
 
 function serveFile(path, res) {
-  if (path === '/') {
-    path = 'index.html';
+  if (path === '/' || path === '/index.html' 
+      || path === '/inuse.html' || path === 'authenticate.html') {
+    if (mbox === '') {
+      path = 'index.html';
+    } else {
+      path = 'inuse.html';
+    }
   } else {
     path = path.substring(1); //drop the initial /
   }
@@ -75,6 +82,7 @@ function serveFile(path, res) {
       res.statusCode = 500;
       res.end(`Error getting the file: ${err}.`);
     } else {
+      console.log (path + ' User: ' + mbox + '(' + name + ')');
       res.setHeader('Content-type', contentType);
       res.end(data);
     }
@@ -86,7 +94,20 @@ http.createServer(function (req, res) {
   var path = url.parse(req.url).pathname;
   console.log('Request received on path ' + path);
 
-  if (path === '/drive') {
+  if (path === "/logout.html") {
+    mbox = '';
+    name = '';
+
+    five.drive(0, 0);
+
+    serveFile('/index.html', res);
+  } else if (path === "/authenticate.html" & mbox === '') {
+    var params = url.parse(req.url, true).query;
+    mbox = params.mbox;
+    name = params.name;
+
+    serveFile('/dual.html', res);
+  } else if (path === '/drive') {
     var params = url.parse(req.url, true).query;
     var left =  params.left ? params.left : 0;
     var right = params.right ? params.right : 0;
