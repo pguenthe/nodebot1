@@ -8,9 +8,14 @@ var name = '';
 var mbox = '';
 
 var five = require("johnny-five"),
-  board = new five.Board();
+  board = new five.Board({
+    repl: false,
+    debug: false,
+  });
 
 board.on("ready", function() {
+  console.log (__dirname);
+
   leftMotor = new five.Motor({
     pins: {
       pwm: 5, //customized
@@ -53,9 +58,9 @@ board.on("ready", function() {
     console.log("cm: ", this.cm);
   });
 
-  board.repl.inject({
-    motors: motors
-  });
+  //board.repl.inject({
+  //  motors: motors
+  //});
 });
 
 five.drive =  function(left, right){
@@ -87,7 +92,7 @@ var fs =  require('fs');
 
 function serveFile(path, res) {
   if (path === '/' || path === '/index.html' 
-      || path === '/inuse.html' || path === 'authenticate.html') {
+      || path === '/inuse.html' || path === '/authenticate.html') {
     if (mbox === '') {
       path = 'index.html';
     } else {
@@ -104,7 +109,11 @@ function serveFile(path, res) {
     contentType = 'image/png';
   }
 
-  fs.readFile(path, function(err, data){
+  if(!path.startsWith('/')) {
+    path = '/' + path;
+  }
+
+  fs.readFile(__dirname + path, function(err, data){
     if(err){
       res.statusCode = 500;
       res.end(`Error getting the file: ${err}.`);
